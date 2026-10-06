@@ -13,7 +13,7 @@ const [articles, setArticles] = useState([]);
     async function fetchArticles() {
       try {
         const res = await fetch(
-          "https://test.course.start-tech.ae/api/articles?per_page=10&page=1",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/articles?per_page=10&page=1`,
           {
             headers: {
               Accept: "application/json",
