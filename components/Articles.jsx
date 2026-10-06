@@ -1,117 +1,215 @@
 "use client"
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion';
 import { fadeIn } from '@/variants';
 
 const Articles = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-const [articles, setArticles] = useState([]);
+  const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchArticles() {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/articles?per_page=10&page=1`,
-          {
-            headers: {
-              Accept: "application/json",
-            },
-          }
-        );
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/api/articles?per_page=10&page=1`;
+        const res = await fetch(url, { headers: { Accept: "application/json" } });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const json = await res.json();
-        // Laravel غالباً بيرجع { data: { data: [...] } }
-        setArticles(Array.isArray(json.data?.data) ? json.data.data : []);
+        const list =
+          Array.isArray(json?.data?.data) ? json.data.data :
+          Array.isArray(json?.data)       ? json.data       :
+          Array.isArray(json)             ? json             :
+          [];
+
+        setArticles(list);
       } catch (err) {
         console.error("Error fetching articles:", err);
       } finally {
         setLoading(false);
       }
     }
-
     fetchArticles();
   }, []);
 
-  if (loading) return <p className="text-center py-10">Loading articles...</p>;
+  // Autoplay (اختياري) — علّق عليه لو ما بدك
+  useEffect(() => {
+    if (articles.length <= 1) return;
+    const id = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % articles.length);
+    }, 6000);
+    return () => clearInterval(id);
+  }, [articles.length]);
 
-  const prevSlide = () => {
+  const prevSlide = () =>
     setCurrentIndex((prev) => (prev === 0 ? articles.length - 1 : prev - 1));
-  };
 
-  const nextSlide = () => {
+  const nextSlide = () =>
     setCurrentIndex((prev) => (prev === articles.length - 1 ? 0 : prev + 1));
-  };
 
-  const goToSlide = (index) => {
-    setCurrentIndex(index);
-  };
+  const goToSlide = (index) => setCurrentIndex(index);
+
+  if (loading) {
+    return (
+      <div className="w-full flex items-center justify-center py-20">
+        <div className="w-10 h-10 border-4 border-gray-200 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!articles.length) {
+    return (
+      <div className="w-full text-center py-20 text-gray-500">
+        لا توجد مقالات حالياً
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full relative bg-white max-h-[100vh] md:p-20 p-10 flex flex-col items-center gap-5">
-      <motion.h1 variants={fadeIn("left", 0.1)}
-              initial="hidden"
-              whileInView={"show"}
-              viewport={{ once: false, amount: 0.2 }}  className="text-primaryText font-black text-center mb-10 text-[30px]">
-        Articles
-      </motion.h1>
+    <section className="w-full bg-gradient-to-b from-white to-gray-50 py-16 md:py-24 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto flex flex-col items-center">
 
-      <div className="relative w-full max-w-[85vw] overflow-hidden">
-        {/* Slider wrapper */}
-        <div 
-          className="flex transition-transform duration-500"
-          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        {/* العنوان */}
+        <motion.h1
+          variants={fadeIn("left", 0.1)}
+          initial="hidden"
+          whileInView={"show"}
+          viewport={{ once: false, amount: 0.2 }}
+          className="text-primaryText font-black text-center mb-10 md:mb-14
+                     text-3xl sm:text-4xl md:text-5xl tracking-tight"
         >
-          {articles.map((article, index) => (
-            <Link
-            href={"/articles"}
-              key={index}
-              className="min-w-full px-10 py-3 font-normal md:h-[20vh] max-h-[40vh] rounded-lg md:px-20 bg-primary"
+          Articles
+        </motion.h1>
+
+        {/* السلايدر */}
+        <div className="relative w-full">
+
+          {/* إطار الكارد */}
+          <div className="relative w-full overflow-hidden rounded-2xl shadow-xl ring-1 ring-black/5 bg-white">
+            <div
+              className="flex transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
+              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
             >
-              <motion.div  variants={fadeIn("right", 0.2)}
-              initial="hidden"
-              whileInView={"show"}
-              viewport={{ once: false, amount: 0.2 }}  className="flex flex-col items-center">
-                <h3 className="mb-2 md:text-xl text-center text-sm font-semibold leading-snug text-primaryText">
-                  {article.title}
-                </h3>
-              <motion.p  variants={fadeIn("right", 0.3)}
-              initial="hidden"
-              whileInView={"show"}
-              viewport={{ once: false, amount: 0.2 }}  className="text-primaryText/30 line-clamp-2 ">{article.content}</motion.p>
-              </motion.div>
-            </Link>
-          ))}
-        </div>
-      </div>
+              {articles.map((article, index) => (
+                <Link
+                  href="/articles"
+                  key={article.id ?? index}
+                  className="min-w-full group block"
+                >
+                  <article className="flex flex-col items-center justify-center
+                                      gap-4 px-6 sm:px-10 md:px-16
+                                      py-10 md:py-14
+                                      min-h-[260px] sm:min-h-[300px] md:min-h-[340px]
+                                      bg-gradient-to-br from-primary to-primary/90
+                                      transition-colors duration-300">
+                    <motion.h3
+                      variants={fadeIn("up", 0.15)}
+                      initial="hidden"
+                      whileInView={"show"}
+                      viewport={{ once: false, amount: 0.2 }}
+                      className="text-primaryText font-bold text-center
+                                 text-lg sm:text-xl md:text-2xl lg:text-3xl
+                                 leading-snug max-w-3xl"
+                    >
+                      {article.title}
+                    </motion.h3>
 
-      {/* Dots Indicators */}
-      <div className="flex mt-4 space-x-2">
-        {articles.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`w-3 h-3 rounded-full ${
-              currentIndex === index ? "bg-accent-hover" : "bg-gray-300"
-            }`}
-          />
-        ))}
-         {/* Navigation buttons */}
-        <button
-          onClick={prevSlide}
-          className="absolute px-3 py-2 translate-x-[57px]  md:translate-x-[67px] md:translate-y-[40%] text-primaryText/60 translate-y-[110px] bg-accent-gold transition-all ease-in-out duration-200 hover:text-primaryText rounded left-2 top-1/2 hover:bg-accent-Default/40"
-        >
-          Prev
-        </button>
-        <button
-          onClick={nextSlide}
-          className="absolute px-3 py-2  -translate-x-[57px]   md:-translate-x-[75px] md:translate-y-[40%] translate-y-[110px] text-primaryText/60 bg-accent-gold transition-all ease-in-out duration-200 hover:text-primaryText rounded right-2 top-1/2 hover:bg-accent-Default/40"
-        >
-          Next
-        </button>
+                    <motion.p
+                      variants={fadeIn("up", 0.25)}
+                      initial="hidden"
+                      whileInView={"show"}
+                      viewport={{ once: false, amount: 0.2 }}
+                      className="text-primaryText/70 text-center
+                                 text-sm sm:text-base md:text-lg
+                                 leading-relaxed line-clamp-3 max-w-2xl"
+                    >
+                      {article.content}
+                    </motion.p>
+
+                    <span className="mt-2 inline-flex items-center gap-2
+                                     text-accent-gold font-semibold
+                                     text-sm sm:text-base
+                                     transition-transform duration-300
+                                     group-hover:translate-x-1">
+                      اقرأ المزيد
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                           viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M13 5l7 7-7 7"/>
+                      </svg>
+                    </span>
+                  </article>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* أزرار Prev / Next — Overlay */}
+          {articles.length > 1 && (
+            <>
+              <button
+                onClick={prevSlide}
+                aria-label="Previous"
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20
+                           w-10 h-10 sm:w-12 sm:h-12
+                           flex items-center justify-center
+                           rounded-full bg-white/90 backdrop-blur
+                           text-primaryText shadow-lg
+                           ring-1 ring-black/5
+                           transition-all duration-300
+                           hover:bg-white hover:scale-110 hover:shadow-xl
+                           active:scale-95"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 18l-6-6 6-6"/>
+                </svg>
+              </button>
+
+              <button
+                onClick={nextSlide}
+                aria-label="Next"
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20
+                           w-10 h-10 sm:w-12 sm:h-12
+                           flex items-center justify-center
+                           rounded-full bg-white/90 backdrop-blur
+                           text-primaryText shadow-lg
+                           ring-1 ring-black/5
+                           transition-all duration-300
+                           hover:bg-white hover:scale-110 hover:shadow-xl
+                           active:scale-95"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Dots Indicators */}
+        {articles.length > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-8">
+            {articles.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                aria-label={`Go to slide ${index + 1}`}
+                className={`h-2.5 rounded-full transition-all duration-300
+                  ${currentIndex === index
+                    ? "w-8 bg-accent-gold"
+                    : "w-2.5 bg-gray-300 hover:bg-gray-400"
+                  }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
-    </div>
+    </section>
   );
 };
 
