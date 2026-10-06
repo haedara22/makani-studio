@@ -3,6 +3,7 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeIn } from '@/variants';
+import Image from "next/image";
 
 const Articles = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -12,7 +13,7 @@ const Articles = () => {
   useEffect(() => {
     async function fetchArticles() {
       try {
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/api/articles?per_page=10&page=1`;
+        const url = `${process.env.NEXT_PUBLIC_API_URL}api/articles?per_page=10&page=1`;
         const res = await fetch(url, { headers: { Accept: "application/json" } });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -92,56 +93,77 @@ const Articles = () => {
               style={{ transform: `translateX(-${currentIndex * 100}%)` }}
             >
               {articles.map((article, index) => (
-                <Link
-                  href="/articles"
-                  key={article.id ?? index}
-                  className="min-w-full group block"
-                >
-                  <article className="flex flex-col items-center justify-center
-                                      gap-4 px-6 sm:px-10 md:px-16
-                                      py-10 md:py-14
-                                      min-h-[260px] sm:min-h-[300px] md:min-h-[340px]
-                                      bg-gradient-to-br from-primary to-primary/90
-                                      transition-colors duration-300">
-                    <motion.h3
-                      variants={fadeIn("up", 0.15)}
-                      initial="hidden"
-                      whileInView={"show"}
-                      viewport={{ once: false, amount: 0.2 }}
-                      className="text-primaryText font-bold text-center
-                                 text-lg sm:text-xl md:text-2xl lg:text-3xl
-                                 leading-snug max-w-3xl"
-                    >
-                      {article.title}
-                    </motion.h3>
+  <Link
+    href={`/articles/${article.id}`}   // ← كان "/articles" فقط، الأفضل يروح لصفحة المقال
+    key={article.id ?? index}
+    className="min-w-full group block"
+  >
+    <article className="flex flex-col items-center justify-center
+                        min-h-[380px] sm:min-h-[440px] md:min-h-[500px]
+                        bg-gradient-to-br from-primary to-primary/90
+                        transition-colors duration-300 overflow-hidden">
 
-                    <motion.p
-                      variants={fadeIn("up", 0.25)}
-                      initial="hidden"
-                      whileInView={"show"}
-                      viewport={{ once: false, amount: 0.2 }}
-                      className="text-primaryText/70 text-center
-                                 text-sm sm:text-base md:text-lg
-                                 leading-relaxed line-clamp-3 max-w-2xl"
-                    >
-                      {article.content}
-                    </motion.p>
+      {/* ✅ الصورة */}
+      <div className="relative w-full h-48 sm:h-56 md:h-64 lg:h-72 bg-gray-100">
+        {article.thumbnail ? (
+          <Image
+            src={article.thumbnail}
+            alt={article.title || "article"}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1100px"
+            className="object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+            لا توجد صورة
+          </div>
+        )}
+      </div>
 
-                    <span className="mt-2 inline-flex items-center gap-2
-                                     text-accent-gold font-semibold
-                                     text-sm sm:text-base
-                                     transition-transform duration-300
-                                     group-hover:translate-x-1">
-                      اقرأ المزيد
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                           viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                           strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M5 12h14M13 5l7 7-7 7"/>
-                      </svg>
-                    </span>
-                  </article>
-                </Link>
-              ))}
+      {/* ✅ المحتوى */}
+      <div className="flex flex-col items-center justify-center
+                      gap-3 px-6 sm:px-10 md:px-16
+                      py-8 md:py-10 flex-1 w-full">
+        <motion.h3
+          variants={fadeIn("up", 0.15)}
+          initial="hidden"
+          whileInView={"show"}
+          viewport={{ once: false, amount: 0.2 }}
+          className="text-primaryText font-bold text-center
+                     text-lg sm:text-xl md:text-2xl lg:text-3xl
+                     leading-snug max-w-3xl line-clamp-2"
+        >
+          {article.title}
+        </motion.h3>
+
+        <motion.p
+          variants={fadeIn("up", 0.25)}
+          initial="hidden"
+          whileInView={"show"}
+          viewport={{ once: false, amount: 0.2 }}
+          className="text-primaryText/70 text-center
+                     text-sm sm:text-base md:text-lg
+                     leading-relaxed line-clamp-3 max-w-2xl"
+        >
+          {article.content}
+        </motion.p>
+
+        <span className="mt-2 inline-flex items-center gap-2
+                         text-accent-gold font-semibold
+                         text-sm sm:text-base
+                         transition-transform duration-300
+                         group-hover:translate-x-1">
+          اقرأ المزيد
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14M13 5l7 7-7 7"/>
+          </svg>
+        </span>
+      </div>
+    </article>
+  </Link>
+))}
             </div>
           </div>
 
