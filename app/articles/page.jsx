@@ -75,15 +75,15 @@ const Page = () => {
                   animate="show"
                   className="cursor-pointer flex flex-col justify-between h-[500px] border rounded-lg shadow-md bg-white"
                 >
-                  <div className="w-full h-[300px]">
-                  <Image
-  src={article.thumbnail}
-  alt={article.title}
-  width={400}
-  height={300}
-  className="object-contain h-full w-full rounded-t-lg bg-gray-100"
-/>
-                  </div>
+                 <div className="relative w-full h-48 sm:h-56 md:h-64 lg:h-72">
+  <Image
+    src={article.thumbnail}
+    alt={article.title}
+    fill
+    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+    className="object-contain rounded-t-lg bg-gray-100"
+  />
+</div>
                   <div className="flex flex-col px-4 py-3 h-[40%]">
                     <p className="md:text-xl text-xl font-semibold text-primaryText">
                       {article.title}
