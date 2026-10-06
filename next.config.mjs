@@ -3,7 +3,7 @@ const nextConfig = {
     images: {
     domains: [
       'images.unsplash.com',
-      "test.course.start-tech.ae",
+      "https://api.makani-studio.com",
     ],
   },
 };
