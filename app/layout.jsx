@@ -27,7 +27,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ar" dir="rtl" className={inter.variable}>
+    <html lang="en" dir="ltr" className={inter.variable}>
       <body className="antialiased">
         <Header />
         <StairTransition />
