@@ -76,13 +76,13 @@ const Page = () => {
                   className="cursor-pointer flex flex-col justify-between h-[500px] border rounded-lg shadow-md bg-white"
                 >
                   <div className="w-full h-[300px]">
-                    <Image
-                      src={article.thumbnail}
-                      alt={article.title}
-                      width={400}
-                      height={300}
-                      className="object-cover h-full w-full rounded-t-lg"
-                    />
+                  <Image
+  src={article.thumbnail}
+  alt={article.title}
+  width={400}
+  height={300}
+  className="object-contain h-full w-full rounded-t-lg bg-gray-100"
+/>
                   </div>
                   <div className="flex flex-col px-4 py-3 h-[40%]">
                     <p className="md:text-xl text-xl font-semibold text-primaryText">

@@ -3,7 +3,7 @@ const nextConfig = {
     images: {
     domains: [
       'images.unsplash.com',
-      "https://api.makani-studio.com",
+      "api.makani-studio.com",
     ],
   },
 };
